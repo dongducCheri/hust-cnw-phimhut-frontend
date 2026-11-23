@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { movieApi } from '../api/movieApi'
 import type { Episode, MovieDetail } from '../types/movie'
 import { HlsVideoPlayer } from '../components/watch/HlsVideoPlayer'
+import { CommentSection } from '../components/watch/CommentSection'
 import './WatchPage.css'
 
 interface WatchPageProps {
@@ -64,6 +65,15 @@ export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail })
 
   return (
     <div className="watch-page">
+      {/* Khu vực chiếu phim rộng toàn màn hình */}
+      <div className="watch-player-stage">
+        <HlsVideoPlayer
+          videoUrl={currentEpisode?.video_url}
+          poster={movie.banner_url || movie.poster_url}
+          episodeTitle={currentEpisode?.title}
+        />
+      </div>
+
       <div className="watch-container">
         <button type="button" className="watch-back-btn" onClick={onBackToDetail}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,12 +81,6 @@ export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail })
           </svg>
           Quay lại chi tiết phim
         </button>
-
-        <HlsVideoPlayer
-          videoUrl={currentEpisode?.video_url}
-          poster={movie.banner_url || movie.poster_url}
-          episodeTitle={currentEpisode?.title}
-        />
 
         <div className="watch-info-card">
           <h1 className="watch-movie-title">{movie.title}</h1>
@@ -112,6 +116,7 @@ export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail })
             </div>
           </section>
         )}
+        <CommentSection movieId={movie.id} />
       </div>
     </div>
   )
