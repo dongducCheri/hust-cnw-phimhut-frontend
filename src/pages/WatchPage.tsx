@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { movieApi } from '../api/movieApi'
 import type { Episode, MovieDetail } from '../types/movie'
 import { HlsVideoPlayer } from '../components/watch/HlsVideoPlayer'
+import { CommentSection } from '../components/watch/CommentSection'
 import './WatchPage.css'
 
 interface WatchPageProps {
@@ -115,6 +116,7 @@ export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail })
             </div>
           </section>
         )}
+        <CommentSection movieId={movie.id} />
       </div>
     </div>
   )
