@@ -11,7 +11,17 @@ export async function apiClient<T>(endpoint: string, options?: RequestInit): Pro
   })
 
   if (!response.ok) {
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`)
+    let message = `API call failed: ${response.status} ${response.statusText}`
+    try {
+      const errData = await response.json()
+      if (errData.error) message = errData.error
+      else if (Array.isArray(errData.errors) && errData.errors.length > 0) {
+        message = errData.errors.join(', ')
+      }
+    } catch {
+      // ignore JSON parse error
+    }
+    throw new Error(message)
   }
 
   return response.json()

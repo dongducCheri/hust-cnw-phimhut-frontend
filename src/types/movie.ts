@@ -30,6 +30,7 @@ export interface Episode {
 export interface CommentItem {
   id: number
   movie_id: number
+  user_id: number | null
   content: string
   created_at: string
   user_name: string
