@@ -3,14 +3,16 @@ import { movieApi } from '../api/movieApi'
 import type { Episode, MovieDetail } from '../types/movie'
 import { HlsVideoPlayer } from '../components/watch/HlsVideoPlayer'
 import { CommentSection } from '../components/watch/CommentSection'
+import type { UserProfile } from '../types/auth'
 import './WatchPage.css'
 
 interface WatchPageProps {
   movieId: number
+  currentUser?: UserProfile | null
   onBackToDetail: () => void
 }
 
-export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail }) => {
+export const WatchPage: React.FC<WatchPageProps> = ({ movieId, currentUser, onBackToDetail }) => {
   const [movie, setMovie] = useState<MovieDetail | null>(null)
   const [currentEpisode, setCurrentEpisode] = useState<Episode | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -116,7 +118,7 @@ export const WatchPage: React.FC<WatchPageProps> = ({ movieId, onBackToDetail })
             </div>
           </section>
         )}
-        <CommentSection movieId={movie.id} />
+        <CommentSection movieId={movie.id} currentUser={currentUser} />
       </div>
     </div>
   )

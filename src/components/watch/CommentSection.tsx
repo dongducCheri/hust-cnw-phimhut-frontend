@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { commentApi } from '../../api/commentApi'
 import type { CommentItem } from '../../types/movie'
+import type { UserProfile } from '../../types/auth'
 import './CommentSection.css'
 
 interface CommentSectionProps {
   movieId: number
+  currentUser?: UserProfile | null
 }
 
-export const CommentSection: React.FC<CommentSectionProps> = ({ movieId }) => {
+export const CommentSection: React.FC<CommentSectionProps> = ({ movieId, currentUser }) => {
   const [comments, setComments] = useState<CommentItem[]>([])
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -91,29 +93,35 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ movieId }) => {
 
       {comments.length > 0 && (
         <div className="comment-list">
-          {comments.map((c) => (
-            <div key={c.id} className="comment-item">
-              <div className="comment-item-header">
-                <div className="comment-meta">
-                  <span className="comment-author">{c.user_name}</span>
-                  <span className="comment-date">
-                    {new Date(c.created_at).toLocaleString('vi-VN')}
-                  </span>
+          {comments.map((c) => {
+            const canDelete =
+              Boolean(currentUser) &&
+              (c.user_id === currentUser?.id || currentUser?.role === 'admin')
+
+            return (
+              <div key={c.id} className="comment-item">
+                <div className="comment-item-header">
+                  <div className="comment-meta">
+                    <span className="comment-author">{c.user_name}</span>
+                    <span className="comment-date">
+                      {new Date(c.created_at).toLocaleString('vi-VN')}
+                    </span>
+                  </div>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      className="comment-delete-btn"
+                      title="Xóa bình luận"
+                      onClick={() => handleDelete(c.id)}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-                {hasToken && (
-                  <button
-                    type="button"
-                    className="comment-delete-btn"
-                    title="Xóa bình luận"
-                    onClick={() => handleDelete(c.id)}
-                  >
-                    ✕
-                  </button>
-                )}
+                <p className="comment-content">{c.content}</p>
               </div>
-              <p className="comment-content">{c.content}</p>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </section>

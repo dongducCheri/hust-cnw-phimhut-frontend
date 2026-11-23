@@ -108,6 +108,7 @@ export function App() {
       {currentPage === 'watch' && (
         <WatchPage
           movieId={selectedMovieId}
+          currentUser={currentUser}
           onBackToDetail={() => setCurrentPage('detail')}
         />
       )}
