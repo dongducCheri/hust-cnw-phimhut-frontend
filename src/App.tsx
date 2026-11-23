@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Navbar } from './components/common/Navbar'
 import { MovieCatalogPage } from './pages/MovieCatalogPage'
 import { MovieDetailPage } from './pages/MovieDetailPage'
+import { WatchPage } from './pages/WatchPage'
 import './styles/theme.css'
 
 export function App() {
-  const [currentPage, setCurrentPage] = useState<'catalog' | 'detail'>('catalog')
+  const [currentPage, setCurrentPage] = useState<'catalog' | 'detail' | 'watch'>('catalog')
   const [selectedMovieId, setSelectedMovieId] = useState<number>(1)
   const [activeCategory, setActiveCategory] = useState<string>('single')
 
@@ -13,6 +14,13 @@ export function App() {
   const handleSelectMovie = (id: number) => {
     setSelectedMovieId(id)
     setCurrentPage('detail')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Khi bấm nút XEM PHIM -> chuyển sang màn hình Chiếu phim
+  const handleWatchMovie = (id: number) => {
+    setSelectedMovieId(id)
+    setCurrentPage('watch')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -34,11 +42,22 @@ export function App() {
         }}
       />
 
-      {/* 2. Page Content: Danh sách phim HOẶC Chi tiết phim */}
-      {currentPage === 'catalog' ? (
+      {/* 2. Page Content: Danh sách phim / Chi tiết phim / Chiếu phim */}
+      {currentPage === 'catalog' && (
         <MovieCatalogPage onSelectMovie={handleSelectMovie} />
-      ) : (
-        <MovieDetailPage movieId={selectedMovieId} onBack={handleGoHome} />
+      )}
+      {currentPage === 'detail' && (
+        <MovieDetailPage
+          movieId={selectedMovieId}
+          onBack={handleGoHome}
+          onWatchMovie={handleWatchMovie}
+        />
+      )}
+      {currentPage === 'watch' && (
+        <WatchPage
+          movieId={selectedMovieId}
+          onBackToDetail={() => setCurrentPage('detail')}
+        />
       )}
     </div>
   )

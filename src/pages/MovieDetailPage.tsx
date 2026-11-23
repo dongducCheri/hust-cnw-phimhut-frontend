@@ -8,9 +8,10 @@ import './MovieDetailPage.css'
 interface MovieDetailPageProps {
   movieId: number
   onBack: () => void
+  onWatchMovie: (movieId: number) => void
 }
 
-export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBack }) => {
+export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBack, onWatchMovie }) => {
   const [movie, setMovie] = useState<MovieDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
@@ -94,7 +95,7 @@ export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBac
               />
             </div>
 
-            <button className="watch-movie-btn" onClick={() => alert('Bắt đầu xem phim!')}>
+            <button className="watch-movie-btn" onClick={() => onWatchMovie(movie.id)}>
               <span className="play-triangle">▶</span>
               <span>XEM PHIM</span>
             </button>

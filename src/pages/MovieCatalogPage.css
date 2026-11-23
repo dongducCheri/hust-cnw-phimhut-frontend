@@ -1,13 +1,13 @@
 .catalog-container {
-  max-width: 1280px;
+  max-width: 1520px;
   margin: 0 auto;
-  padding: 28px 24px 60px 24px;
+  padding: 24px 28px 60px 28px;
 }
 
 .movies-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
   width: 100%;
 }
 
