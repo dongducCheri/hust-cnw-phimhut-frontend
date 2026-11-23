@@ -27,6 +27,14 @@ export interface Episode {
   video_url?: string
 }
 
+export interface CommentItem {
+  id: number
+  movie_id: number
+  content: string
+  created_at: string
+  user_name: string
+}
+
 export interface MovieSummary {
   id: number
   title: string
