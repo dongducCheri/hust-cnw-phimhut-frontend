@@ -1,25 +1,23 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import type { MovieDetail } from '../types/movie'
 import { movieApi } from '../api/movieApi'
 import { CastList } from '../components/movie/CastList'
 import { TrailerSection } from '../components/movie/TrailerSection'
 import './MovieDetailPage.css'
 
-interface MovieDetailPageProps {
-  movieId: number
-  onBack: () => void
-  onWatchMovie: (movieId: number) => void
-}
-
-export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBack, onWatchMovie }) => {
+export const MovieDetailPage: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [movie, setMovie] = useState<MovieDetail | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false)
 
   useEffect(() => {
+    if (!id) return
     setLoading(true)
     movieApi
-      .getMovieById(movieId)
+      .getMovieById(id)
       .then((data) => {
         setMovie(data)
         setLoading(false)
@@ -27,7 +25,7 @@ export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBac
       .catch(() => {
         setLoading(false)
       })
-  }, [movieId])
+  }, [id])
 
   if (loading) {
     return (
@@ -42,7 +40,6 @@ export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBac
     return (
       <div className="detail-empty">
         <p>Không tìm thấy thông tin phim.</p>
-        <button className="back-btn" onClick={onBack}>← Quay lại</button>
       </div>
     )
   }
@@ -71,14 +68,6 @@ export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBac
 
       {/* 2. Main Content */}
       <div className="detail-container">
-        {/* Back navigation */}
-        <button className="nav-back-btn" onClick={onBack}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-          Quay lại danh sách
-        </button>
-
         {/* Hero Section */}
         <div className="movie-hero">
           {/* Left: Poster + Watch Button */}
@@ -95,7 +84,7 @@ export const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ movieId, onBac
               />
             </div>
 
-            <button className="watch-movie-btn" onClick={() => onWatchMovie(movie.id)}>
+            <button className="watch-movie-btn" onClick={() => navigate(`/watch/${movie.id}`)}>
               <span className="play-triangle">▶</span>
               <span>XEM PHIM</span>
             </button>

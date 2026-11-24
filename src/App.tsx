@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Navbar } from './components/common/Navbar'
 import { MovieCatalogPage } from './pages/MovieCatalogPage'
 import { MovieDetailPage } from './pages/MovieDetailPage'
@@ -9,18 +10,20 @@ import { authApi } from './api/authApi'
 import type { UserProfile } from './types/auth'
 import './styles/theme.css'
 
-type PageView = 'catalog' | 'detail' | 'watch' | 'auth' | 'account'
-
 export function App() {
-  const [currentPage, setCurrentPage] = useState<PageView>('catalog')
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login')
-  const [selectedMovieId, setSelectedMovieId] = useState<number>(1)
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [activeCategory, setActiveCategory] = useState<string>('single')
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null)
+  const [authChecked, setAuthChecked] = useState<boolean>(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) {
+      setAuthChecked(true)
+      return
+    }
 
     authApi
       .me(token)
@@ -29,38 +32,21 @@ export function App() {
         localStorage.removeItem('token')
         setCurrentUser(null)
       })
+      .finally(() => setAuthChecked(true))
   }, [])
 
-  // Khi bấm vào 1 phim bất kỳ -> chuyển sang màn hình Chi tiết phim
-  const handleSelectMovie = (id: number) => {
-    setSelectedMovieId(id)
-    setCurrentPage('detail')
+  // Tự động cuộn lên đầu trang khi đổi URL
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  }, [location.pathname])
 
-  // Khi bấm nút XEM PHIM -> chuyển sang màn hình Chiếu phim
-  const handleWatchMovie = (id: number) => {
-    setSelectedMovieId(id)
-    setCurrentPage('watch')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // Khi bấm nút quay lại hoặc bấm Logo -> quay lại trang danh sách
   const handleGoHome = () => {
-    setCurrentPage('catalog')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const handleOpenAuth = (mode: 'login' | 'signup') => {
-    setAuthMode(mode)
-    setCurrentPage('auth')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    navigate('/')
   }
 
   const handleAuthSuccess = (user: UserProfile) => {
     setCurrentUser(user)
-    setCurrentPage('catalog')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    navigate('/')
   }
 
   const handleLogout = async () => {
@@ -70,8 +56,7 @@ export function App() {
       localStorage.removeItem('token')
     }
     setCurrentUser(null)
-    setCurrentPage('catalog')
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    navigate('/')
   }
 
   return (
@@ -82,45 +67,42 @@ export function App() {
         activeCategory={activeCategory}
         onSelectCategory={(cat) => {
           setActiveCategory(cat)
-          setCurrentPage('catalog')
+          navigate('/')
         }}
         currentUser={currentUser}
-        onOpenAuth={handleOpenAuth}
-        onOpenAccount={() => {
-          setCurrentPage('account')
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        }}
+        onOpenAuth={(mode) => navigate(mode === 'signup' ? '/signup' : '/login')}
+        onOpenAccount={() => navigate('/settings')}
         onLogout={handleLogout}
       />
 
-      {/* 2. Page Content */}
-      {currentPage === 'catalog' && (
-        <MovieCatalogPage onSelectMovie={handleSelectMovie} />
-      )}
-      {currentPage === 'detail' && (
-        <MovieDetailPage
-          movieId={selectedMovieId}
-          onBack={handleGoHome}
-          onWatchMovie={handleWatchMovie}
+      {/* 2. Page Content: Định tuyến bằng URL thật */}
+      <Routes>
+        <Route
+          path="/"
+          element={<MovieCatalogPage onSelectMovie={(id) => navigate(`/movies/${id}`)} />}
         />
-      )}
-      {currentPage === 'watch' && (
-        <WatchPage
-          movieId={selectedMovieId}
-          currentUser={currentUser}
-          onBackToDetail={() => setCurrentPage('detail')}
+        <Route path="/movies/:id" element={<MovieDetailPage />} />
+        <Route path="/watch/:id" element={<WatchPage currentUser={currentUser} />} />
+        <Route
+          path="/login"
+          element={<AuthPage initialMode="login" onSuccess={handleAuthSuccess} />}
         />
-      )}
-      {currentPage === 'auth' && (
-        <AuthPage
-          initialMode={authMode}
-          onSuccess={handleAuthSuccess}
-          onCancel={handleGoHome}
+        <Route
+          path="/signup"
+          element={<AuthPage initialMode="signup" onSuccess={handleAuthSuccess} />}
         />
-      )}
-      {currentPage === 'account' && currentUser && (
-        <AccountPage user={currentUser} onBack={handleGoHome} />
-      )}
+        <Route
+          path="/settings"
+          element={
+            !authChecked ? null : currentUser ? (
+              <AccountPage user={currentUser} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   )
 }
