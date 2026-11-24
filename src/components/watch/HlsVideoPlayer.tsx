@@ -13,6 +13,7 @@ interface QualityLevel {
   label: string
 }
 
+const API_BASE_URL = 'http://localhost:3000/api/v1'
 const SPEED_OPTIONS = [2, 1.75, 1.5, 1.3, 1.15, 1, 0.85, 0.5]
 
 function formatTime(seconds: number): string {
@@ -64,11 +65,21 @@ export const HlsVideoPlayer: React.FC<HlsVideoPlayerProps> = ({
 
     if (!video || !videoUrl) return
 
+    const resolvedUrl = videoUrl.startsWith('http') ? videoUrl : `${API_BASE_URL}${videoUrl}`
+
     if (Hls.isSupported()) {
-      const hls = new Hls({ enableWorker: true })
+      const hls = new Hls({
+        enableWorker: true,
+        xhrSetup: (xhr, url) => {
+          if (url.startsWith(API_BASE_URL)) {
+            const token = localStorage.getItem('token')
+            if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+          }
+        },
+      })
       hlsRef.current = hls
 
-      hls.loadSource(videoUrl)
+      hls.loadSource(resolvedUrl)
       hls.attachMedia(video)
 
       hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
@@ -89,8 +100,13 @@ export const HlsVideoPlayer: React.FC<HlsVideoPlayerProps> = ({
         if (!data.fatal) return
 
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-          setErrorMsg('Lỗi mạng khi tải luồng video. Đang thử lại...')
-          hls.startLoad()
+          if (data.response?.code === 401 || data.response?.code === 403) {
+            setErrorMsg('Vui lòng đăng nhập để xem phim.')
+            hls.destroy()
+          } else {
+            setErrorMsg('Lỗi mạng khi tải luồng video. Đang thử lại...')
+            hls.startLoad()
+          }
         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
           hls.recoverMediaError()
         } else {
@@ -99,7 +115,7 @@ export const HlsVideoPlayer: React.FC<HlsVideoPlayerProps> = ({
         }
       })
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = videoUrl
+      video.src = resolvedUrl
       video.play().catch(() => {
         video.muted = true
         setIsMuted(true)

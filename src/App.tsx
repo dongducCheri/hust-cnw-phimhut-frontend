@@ -70,9 +70,8 @@ export function App() {
       localStorage.removeItem('token')
     }
     setCurrentUser(null)
-    if (currentPage === 'account') {
-      setCurrentPage('catalog')
-    }
+    setCurrentPage('catalog')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (
