@@ -4,18 +4,14 @@ import './AccountPage.css'
 
 interface AccountPageProps {
   user: UserProfile
-  onBack: () => void
 }
 
-export const AccountPage: React.FC<AccountPageProps> = ({ user, onBack }) => {
+export const AccountPage: React.FC<AccountPageProps> = ({ user }) => {
   return (
     <div className="account-page">
       <div className="account-container">
         <div className="account-header">
           <h1 className="account-title">Tài khoản</h1>
-          <button type="button" className="account-back-link" onClick={onBack}>
-            ← Trang chủ
-          </button>
         </div>
 
         <div className="account-table">

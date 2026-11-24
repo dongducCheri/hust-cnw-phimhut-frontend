@@ -6,13 +6,11 @@ import './AuthPage.css'
 interface AuthPageProps {
   initialMode?: 'login' | 'signup'
   onSuccess: (user: UserProfile, token: string) => void
-  onCancel?: () => void
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({
   initialMode = 'login',
   onSuccess,
-  onCancel,
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
   const [name, setName] = useState('')
@@ -114,12 +112,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           <button type="button" onClick={switchMode} className="auth-link-btn">
             {mode === 'login' ? 'Chưa có tài khoản? Đăng ký' : 'Đã có tài khoản? Đăng nhập'}
           </button>
-
-          {onCancel && (
-            <button type="button" onClick={onCancel} className="auth-link-btn">
-              Quay lại trang chủ
-            </button>
-          )}
         </div>
       </div>
     </div>
